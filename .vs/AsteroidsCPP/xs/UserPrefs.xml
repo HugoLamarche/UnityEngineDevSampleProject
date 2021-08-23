@@ -1,0 +1,35 @@
+﻿<Properties StartupConfiguration="{36D0D3D5-F253-0B53-1462-C8B484E142A1}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Runtime/AsteroidsGame.cs">
+    <Files>
+      <File FileName="Assets/Scripts/Runtime/AsteroidsGame.cs" Line="20" Column="7" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="AsteroidsCPP" expanded="True">
+            <Node name="Assets" expanded="True">
+              <Node name="Plugins" expanded="True" />
+              <Node name="Scripts" expanded="True">
+                <Node name="Runtime" expanded="True">
+                  <Node name="AsteroidsGame.cs" selected="True" />
+                </Node>
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.UnitTesting.TestPad">
+        <State name="__root__">
+          <Node name="Unity" expanded="True" selected="True" />
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="cc0ead18-7bdb-40be-8866-a47aead1d187" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
