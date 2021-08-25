@@ -33,11 +33,16 @@ namespace AsteroidsCPP
 		, m_ShipDestroyed(false)
 	{
 		m_AsteroidsTemplateSqrRadius = new float[m_AsteroidTemplatesCount];
+		m_LevelsBoundaries = new std::uint32_t[m_AsteroidTemplatesCount];
+
 		m_AsteroidsCount = 0;
 		for (uint32_t i = 0; i < m_AsteroidTemplatesCount; i++)
 		{
 			// We have twice the number of asteroids within each asteroids's types
 			m_AsteroidsCount += m_MaxAsteroidsCount * (std::uint32_t)pow(2, i);
+
+			// Store the last index of each template type in the Asteroids array
+			m_LevelsBoundaries[i] = m_AsteroidsCount - 1;
 
 			// Radius are set using SetAsteroidTemplateRadius
 			m_AsteroidsTemplateSqrRadius[i] = 0.0f;
@@ -52,7 +57,7 @@ namespace AsteroidsCPP
 		// Only activate the first level of asteroids
 		for (uint32_t i = 0; i < m_AsteroidsCount; i++)
 		{
-			if (i < m_MaxAsteroidsCount)
+			if (true)//i < m_MaxAsteroidsCount)
 			{
 				// TODO: Implement a better way to choose between one of the four sides
 				// Create two value to represent the random start position on X or Y axis
@@ -88,9 +93,14 @@ namespace AsteroidsCPP
 			m_AsteroidsTemplateSqrRadius[level] = sqrRadius;
 	}
 
-	float Game::GetSqrRadiusFromIndex(std::uint32_t index) const
+	std::uint32_t Game::GetLevelFromIndex(std::uint32_t index) const
 	{
-		return m_AsteroidsTemplateSqrRadius[0];
+		std::uint32_t level = 0;
+		while (index > m_LevelsBoundaries[level])
+		{
+			level++;
+		}
+		return level;
 	}
 
 	void Game::Update(KeyState keyState, float deltaTime)
@@ -120,7 +130,7 @@ namespace AsteroidsCPP
 			LoopPosition(m_AsteroidsPositions[i]);
 
 			// Check if the ship was destroyed
-			if (SqrDistance(m_AsteroidsPositions[i], m_ShipPos) < (m_ShipSqrRadius + GetSqrRadiusFromIndex(i)))
+			if (SqrDistance(m_AsteroidsPositions[i], m_ShipPos) < (m_ShipSqrRadius + m_AsteroidsTemplateSqrRadius[GetLevelFromIndex(i)]))
 			{
 				m_ShipDestroyed = true;
 				break;
@@ -156,6 +166,7 @@ namespace AsteroidsCPP
 
 	void Game::LoopPosition(Vec2& position) const
 	{
+		// TODO: Optimize this
 		if (position.x > m_ViewportSize.x) position.x = -m_ViewportSize.x;
 		if (position.x < -m_ViewportSize.x) position.x = m_ViewportSize.x;
 		if (position.y > m_ViewportSize.y) position.y = -m_ViewportSize.y;

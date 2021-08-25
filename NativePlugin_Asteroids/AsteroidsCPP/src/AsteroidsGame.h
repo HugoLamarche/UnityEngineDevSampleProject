@@ -90,7 +90,7 @@ namespace AsteroidsCPP
 		const Vec3 GetShipPosRot() const { return Vec3(m_ShipPos.x, m_ShipPos.y, m_ShipRot); }
 
 	private:
-        float GetSqrRadiusFromIndex(std::uint32_t index) const;
+        std::uint32_t GetLevelFromIndex(std::uint32_t index) const;
 
 		void UpdateAsteroids(float deltaTime);
 		void ApplyShipControl(KeyState state, float deltaTime);
@@ -110,6 +110,7 @@ namespace AsteroidsCPP
 		Vec2 m_ViewportSize;
 
 		uint32_t m_AsteroidsCount;
+        uint32_t* m_LevelsBoundaries;
 
 		Vec2* m_AsteroidsPositions;
 		Vec2* m_AsteroidsSpeeds;
