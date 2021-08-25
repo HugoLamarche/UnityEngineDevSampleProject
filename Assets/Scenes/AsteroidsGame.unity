@@ -240,8 +240,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48f1fec219eb37c4a9d96c28b8a4f945, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ShipControlSpeed: 1
+  m_ShipControlSpeed: 3
   m_ShipControlRotationSpeed: 230
+  m_ShipMaxSpeed: 3
   m_MaxAsteroidsCount: 3
   m_Camera: {fileID: 1151198476}
   m_Ship: {fileID: 2041853587}
