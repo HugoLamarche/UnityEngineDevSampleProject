@@ -12,6 +12,8 @@ public class AsteroidsGame : MonoBehaviour
     public float m_ShipMaxSpeed = 3.0f;
 
     public uint m_MaxAsteroidsCount = 10;
+    public float m_MinAsteroidsSpeed = 1.0f;
+    public float m_MaxAsteroidsSpeed = 5.0f;
 
     public GameObject m_Camera;
     public GameObject m_Ship;
@@ -46,7 +48,7 @@ public class AsteroidsGame : MonoBehaviour
     static extern int AddNumbers(int a, int b);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
-    static extern IntPtr AllocateGamePtr(float shipSpeed, float shipRotationSpeed, float shipMaxSpeed, uint asteroidTemplatesCount, uint maxAsteroidsCount, Vector2 viewportSize);
+    static extern IntPtr AllocateGamePtr(float shipSpeed, float shipRotationSpeed, float shipMaxSpeed, uint asteroidTemplatesCount, uint maxAsteroidsCount, float minAsteroidsSpeed, float maxAsteroidsSpeed, Vector2 viewportSize);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern void DetroyGamePtr(IntPtr gamePtr);
@@ -75,7 +77,7 @@ public class AsteroidsGame : MonoBehaviour
         Vector2 viewportSize = new Vector2(camera.orthographicSize * camera.aspect, camera.orthographicSize);
 
         // Allocate the game instance
-        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, m_ShipMaxSpeed, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, viewportSize);
+        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, m_ShipMaxSpeed, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, m_MinAsteroidsSpeed, m_MaxAsteroidsSpeed, viewportSize);
 
         // Preallocate Asteroids
         m_TotalAsteroidsCount = GetAsteroidsCount(m_GamePtr);
@@ -96,6 +98,8 @@ public class AsteroidsGame : MonoBehaviour
             }
             level++;
         }
+
+        // Preallocate Bullets
     }
     void OnDestroy()
     {
@@ -113,7 +117,7 @@ public class AsteroidsGame : MonoBehaviour
         }
 
         // Update Asteroids
-        // TODO: Only transfer active asteroids
+        // TODO: Optimize by only transfering active asteroids
         IntPtr ptrPositions;
         GetAsteroidsPositions(m_GamePtr, out ptrPositions);
         IntPtr p = ptrPositions;

@@ -18,7 +18,14 @@ extern "C"
 	namespace AsteroidsCPP
 	{
 
-		ASTEROID_EXPORT void* AllocateGamePtr(float shipControlSpeed, float shipControlRotationSpeed, float shipMaxSpeed, std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, Vec2 viewportSize);
+		ASTEROID_EXPORT void* AllocateGamePtr(float shipControlSpeed,
+											  float shipControlRotationSpeed,
+											  float shipMaxSpeed,
+											  std::uint32_t asteroidTemplatesCount,
+											  std::uint32_t maxAsteroidsCount,
+											  float minAsteroidsSpeed,
+											  float maxAsteroidsSpeed,
+											  Vec2 viewportSize);
 
 		ASTEROID_EXPORT void DetroyGamePtr(void* gamePtr);
 

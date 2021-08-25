@@ -243,7 +243,9 @@ MonoBehaviour:
   m_ShipControlSpeed: 3
   m_ShipControlRotationSpeed: 230
   m_ShipMaxSpeed: 3
-  m_MaxAsteroidsCount: 3
+  m_MaxAsteroidsCount: 5
+  m_MinAsteroidsSpeed: 1
+  m_MaxAsteroidsSpeed: 3
   m_Camera: {fileID: 1151198476}
   m_Ship: {fileID: 2041853587}
   m_AsteroidTemplates:

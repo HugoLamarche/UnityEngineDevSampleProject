@@ -22,7 +22,13 @@ namespace AsteroidsCPP
 			return result;
 		}
 
-		void operator+=(Vec2 a)
+		void operator*=(const Vec2& a)
+		{
+			x *= a.x;
+			y *= a.y;
+		}
+
+		void operator+=(const Vec2& a)
 		{
 			x += a.x;
 			y += a.y;
@@ -64,7 +70,14 @@ namespace AsteroidsCPP
 			}
 		};
 
-		Game(float shipControlSpeed, float shipControlRotationSpeed, float shipMaxSpeed, std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, const Vec2& viewportSize);
+		Game(float shipControlSpeed,
+             float shipControlRotationSpeed,
+             float shipMaxSpeed,
+             std::uint32_t asteroidTemplatesCount,
+             std::uint32_t maxAsteroidsCount,
+             float minAsteroidsSpeed,
+             float maxAsteroidsSpeed,
+             const Vec2& viewportSize);
 		~Game();
 
 		void Update(KeyState state, float deltaTime);
@@ -84,6 +97,8 @@ namespace AsteroidsCPP
 
 		uint32_t m_AsteroidTemplatesCount;
 		uint32_t m_MaxAsteroidsCount;
+        float m_MinAsteroidsSpeed;
+        float m_MaxAsteroidsSpeed;
 		Vec2 m_ViewportSize;
 
 		uint32_t m_AsteroidsCount;
