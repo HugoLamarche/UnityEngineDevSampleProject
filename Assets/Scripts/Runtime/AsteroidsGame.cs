@@ -48,10 +48,21 @@ public class AsteroidsGame : MonoBehaviour
     static extern int AddNumbers(int a, int b);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
-    static extern IntPtr AllocateGamePtr(float shipSpeed, float shipRotationSpeed, float shipMaxSpeed, uint asteroidTemplatesCount, uint maxAsteroidsCount, float minAsteroidsSpeed, float maxAsteroidsSpeed, Vector2 viewportSize);
+    static extern IntPtr AllocateGamePtr(float shipSpeed,
+                                         float shipRotationSpeed,
+                                         float shipMaxSpeed,
+                                         float shipSqrRadius,
+                                         uint asteroidTemplatesCount,
+                                         uint maxAsteroidsCount,
+                                         float minAsteroidsSpeed,
+                                         float maxAsteroidsSpeed,
+                                         Vector2 viewportSize);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern void DetroyGamePtr(IntPtr gamePtr);
+
+    [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
+    static extern uint SetAsteroidTemplateSqrRadius(IntPtr gamePtr, uint level, float sqrRadius);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern uint GetAsteroidsCount(IntPtr gamePtr);
@@ -67,6 +78,11 @@ public class AsteroidsGame : MonoBehaviour
 
     #endregion
 
+    float GetSqrRadiusFromBound(Bounds bounds)
+    {
+        return bounds.extents.x * bounds.extents.x;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -76,8 +92,14 @@ public class AsteroidsGame : MonoBehaviour
         Assert.IsNotNull(camera, "The camera gameobject doesn't have a camera component");
         Vector2 viewportSize = new Vector2(camera.orthographicSize * camera.aspect, camera.orthographicSize);
 
+        // Retreive Ship Radius
+        Assert.IsNotNull(m_Ship, "Please assign the ship");
+        SpriteRenderer shipRenderer = m_Ship.GetComponent<SpriteRenderer>();
+        Assert.IsNotNull(shipRenderer, "The ship gameobject doesn't have a sprite renderer");
+        float shipSqrRadius = GetSqrRadiusFromBound(shipRenderer.bounds);
+
         // Allocate the game instance
-        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, m_ShipMaxSpeed, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, m_MinAsteroidsSpeed, m_MaxAsteroidsSpeed, viewportSize);
+        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, m_ShipMaxSpeed, shipSqrRadius, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, m_MinAsteroidsSpeed, m_MaxAsteroidsSpeed, viewportSize);
 
         // Preallocate Asteroids
         m_TotalAsteroidsCount = GetAsteroidsCount(m_GamePtr);
@@ -89,6 +111,10 @@ public class AsteroidsGame : MonoBehaviour
         {
             // We expect the data to be correct and cannot work properly if not
             Assert.IsNotNull(template, "One of the asteroid template is null");
+            SpriteRenderer asteroidRenderer = template.GetComponent<SpriteRenderer>();
+            Assert.IsNotNull(asteroidRenderer, "One of the asteroid gameobject doesn't have a sprite renderer");
+
+            SetAsteroidTemplateSqrRadius(m_GamePtr, level, GetSqrRadiusFromBound(asteroidRenderer.bounds));
 
             for (uint i = 0; i < m_MaxAsteroidsCount * Math.Pow(2, level); i++)
             {

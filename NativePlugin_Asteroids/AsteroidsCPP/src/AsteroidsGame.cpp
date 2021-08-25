@@ -12,6 +12,7 @@ namespace AsteroidsCPP
 	Game::Game(float shipControlSpeed,
 			   float shipControlRotationSpeed,
 			   float shipMaxSpeed,
+			   float shipSqrRadius,
 			   std::uint32_t asteroidTemplatesCount,
 			   std::uint32_t maxAsteroidsCount,
 			   float minAsteroidsSpeed,
@@ -20,6 +21,7 @@ namespace AsteroidsCPP
 		: m_ShipControlSpeed(shipControlSpeed)
 		, m_ShipControlRotationSpeed(shipControlRotationSpeed)
 		, m_ShipMaxSpeed(shipMaxSpeed)
+		, m_ShipSqrRadius(shipSqrRadius)
 		, m_AsteroidTemplatesCount(asteroidTemplatesCount)
 		, m_MaxAsteroidsCount(maxAsteroidsCount)
 		, m_MinAsteroidsSpeed(minAsteroidsSpeed)
@@ -28,11 +30,18 @@ namespace AsteroidsCPP
 		, m_AsteroidsPositions(nullptr)
 		, m_AsteroidsSpeeds(nullptr)
 		, m_ShipRot(0.0f)
+		, m_ShipDestroyed(false)
 	{
+		m_AsteroidsTemplateSqrRadius = new float[m_AsteroidTemplatesCount];
 		m_AsteroidsCount = 0;
 		for (uint32_t i = 0; i < m_AsteroidTemplatesCount; i++)
+		{
 			// We have twice the number of asteroids within each asteroids's types
 			m_AsteroidsCount += m_MaxAsteroidsCount * (std::uint32_t)pow(2, i);
+
+			// Radius are set using SetAsteroidTemplateRadius
+			m_AsteroidsTemplateSqrRadius[i] = 0.0f;
+		}
 
 		m_AsteroidsPositions = new Vec2[m_AsteroidsCount];
 		m_AsteroidsSpeeds = new Vec2[m_AsteroidsCount];
@@ -73,15 +82,31 @@ namespace AsteroidsCPP
 		delete m_AsteroidsSpeeds;
 	}
 
+	void Game::SetAsteroidTemplateSqrRadius(std::uint32_t level, float sqrRadius)
+	{
+		if (level < m_AsteroidTemplatesCount)
+			m_AsteroidsTemplateSqrRadius[level] = sqrRadius;
+	}
+
+	float Game::GetSqrRadiusFromIndex(std::uint32_t index) const
+	{
+		return m_AsteroidsTemplateSqrRadius[0];
+	}
+
 	void Game::Update(KeyState keyState, float deltaTime)
 	{
-		UpdateAsteroids(deltaTime);
+		if (m_ShipDestroyed)
+			return;
+
 		ApplyShipControl(keyState, deltaTime);
-
-
-		// Check if the ship was destroyed
+		UpdateAsteroids(deltaTime);
 
 		// Check if projectiles are hitting asteroids
+	}
+
+	float SqrDistance(Vec2 a, Vec2 b)
+	{
+		return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 	}
 
 	void Game::UpdateAsteroids(float deltaTime)
@@ -93,6 +118,13 @@ namespace AsteroidsCPP
 
 			m_AsteroidsPositions[i] += m_AsteroidsSpeeds[i] * deltaTime;
 			LoopPosition(m_AsteroidsPositions[i]);
+
+			// Check if the ship was destroyed
+			if (SqrDistance(m_AsteroidsPositions[i], m_ShipPos) < (m_ShipSqrRadius + GetSqrRadiusFromIndex(i)))
+			{
+				m_ShipDestroyed = true;
+				break;
+			}
 		}
 	}
 

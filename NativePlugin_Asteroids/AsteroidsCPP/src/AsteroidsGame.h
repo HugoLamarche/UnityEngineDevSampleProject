@@ -73,12 +73,15 @@ namespace AsteroidsCPP
 		Game(float shipControlSpeed,
              float shipControlRotationSpeed,
              float shipMaxSpeed,
+             float shipSqrRadius,
              std::uint32_t asteroidTemplatesCount,
              std::uint32_t maxAsteroidsCount,
              float minAsteroidsSpeed,
              float maxAsteroidsSpeed,
              const Vec2& viewportSize);
 		~Game();
+
+        void SetAsteroidTemplateSqrRadius(std::uint32_t level, float sqrRadius);
 
 		void Update(KeyState state, float deltaTime);
 
@@ -87,6 +90,8 @@ namespace AsteroidsCPP
 		const Vec3 GetShipPosRot() const { return Vec3(m_ShipPos.x, m_ShipPos.y, m_ShipRot); }
 
 	private:
+        float GetSqrRadiusFromIndex(std::uint32_t index) const;
+
 		void UpdateAsteroids(float deltaTime);
 		void ApplyShipControl(KeyState state, float deltaTime);
 		void LoopPosition(Vec2& position) const;
@@ -94,8 +99,11 @@ namespace AsteroidsCPP
 		float m_ShipControlSpeed;
 		float m_ShipControlRotationSpeed;
 		float m_ShipMaxSpeed;
+        float m_ShipSqrRadius;
 
 		uint32_t m_AsteroidTemplatesCount;
+        float* m_AsteroidsTemplateSqrRadius;
+
 		uint32_t m_MaxAsteroidsCount;
         float m_MinAsteroidsSpeed;
         float m_MaxAsteroidsSpeed;
@@ -109,5 +117,6 @@ namespace AsteroidsCPP
 		Vec2 m_ShipPos;
 		float m_ShipRot;
 		Vec2 m_ShipSpeed;
+        bool m_ShipDestroyed;
 	};
 }

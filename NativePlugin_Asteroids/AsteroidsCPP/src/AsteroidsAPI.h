@@ -21,6 +21,7 @@ extern "C"
 		ASTEROID_EXPORT void* AllocateGamePtr(float shipControlSpeed,
 											  float shipControlRotationSpeed,
 											  float shipMaxSpeed,
+											  float shipSqrRadius,
 											  std::uint32_t asteroidTemplatesCount,
 											  std::uint32_t maxAsteroidsCount,
 											  float minAsteroidsSpeed,
@@ -28,6 +29,8 @@ extern "C"
 											  Vec2 viewportSize);
 
 		ASTEROID_EXPORT void DetroyGamePtr(void* gamePtr);
+
+		ASTEROID_EXPORT void SetAsteroidTemplateSqrRadius(void* gamePtr, std::uint32_t level, float sqrRadius);
 
 		ASTEROID_EXPORT std::uint32_t GetAsteroidsCount(void* gamePtr);
 

@@ -9,19 +9,33 @@ namespace AsteroidsCPP
 	ASTEROID_EXPORT void* AllocateGamePtr(float shipControlSpeed,
 										  float shipControlRotationSpeed,
 										  float shipMaxSpeed,
+										  float shipSqrRadius,
 										  std::uint32_t asteroidTemplatesCount,
 										  std::uint32_t maxAsteroidsCount,
 										  float minAsteroidsSpeed,
 										  float maxAsteroidsSpeed,
 										  Vec2 viewportSize)
 	{
-		return new AsteroidsCPP::Game(shipControlSpeed, shipControlRotationSpeed, shipMaxSpeed, asteroidTemplatesCount, maxAsteroidsCount, minAsteroidsSpeed, maxAsteroidsSpeed, viewportSize);
+		return new AsteroidsCPP::Game(shipControlSpeed,
+									  shipControlRotationSpeed,
+									  shipMaxSpeed,
+									  shipSqrRadius,
+									  asteroidTemplatesCount,
+									  maxAsteroidsCount,
+									  minAsteroidsSpeed,
+									  maxAsteroidsSpeed,
+									  viewportSize);
 	}
 
 	ASTEROID_EXPORT void DetroyGamePtr(void* gamePtr)
 	{
 		if (gamePtr)
 			delete gamePtr;
+	}
+
+	ASTEROID_EXPORT void SetAsteroidTemplateSqrRadius(void* gamePtr, std::uint32_t level, float sqrRadius)
+	{
+		static_cast<AsteroidsCPP::Game*>(gamePtr)->SetAsteroidTemplateSqrRadius(level, sqrRadius);
 	}
 
 	ASTEROID_EXPORT std::uint32_t GetAsteroidsCount(void* gamePtr)
