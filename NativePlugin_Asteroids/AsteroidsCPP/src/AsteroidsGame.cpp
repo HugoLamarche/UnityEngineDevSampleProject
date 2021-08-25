@@ -83,8 +83,10 @@ namespace AsteroidsCPP
 
 	Game::~Game()
 	{
-		delete m_AsteroidsPositions;
-		delete m_AsteroidsSpeeds;
+		delete[] m_AsteroidsTemplateSqrRadius;
+		delete[] m_LevelsBoundaries;
+		delete[] m_AsteroidsPositions;
+		delete[] m_AsteroidsSpeeds;
 	}
 
 	void Game::SetAsteroidTemplateSqrRadius(std::uint32_t level, float sqrRadius)

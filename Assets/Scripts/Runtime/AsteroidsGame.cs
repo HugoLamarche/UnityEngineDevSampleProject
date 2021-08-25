@@ -83,9 +83,21 @@ public class AsteroidsGame : MonoBehaviour
         return bounds.extents.x * bounds.extents.x;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    void ReInitGame()
     {
+        // Cleaning
+        if (m_GamePtr != null)
+            DetroyGamePtr(m_GamePtr);
+
+        if (m_Asteroids != null)
+        {
+            foreach (GameObject asteroid in m_Asteroids)
+            {
+                Destroy(asteroid);
+            }
+            m_Asteroids = null;
+        }
+
         // Calculate viewport
         Assert.IsNotNull(m_Camera, "Please assign the camera");
         Camera camera = m_Camera.GetComponent<Camera>();
@@ -98,7 +110,6 @@ public class AsteroidsGame : MonoBehaviour
         Assert.IsNotNull(shipRenderer, "The ship gameobject doesn't have a sprite renderer");
         float shipSqrRadius = GetSqrRadiusFromBound(shipRenderer.bounds);
 
-        // Allocate the game instance
         m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, m_ShipMaxSpeed, shipSqrRadius, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, m_MinAsteroidsSpeed, m_MaxAsteroidsSpeed, viewportSize);
 
         // Preallocate Asteroids
@@ -126,6 +137,12 @@ public class AsteroidsGame : MonoBehaviour
         }
 
         // Preallocate Bullets
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        ReInitGame();
     }
     void OnDestroy()
     {
@@ -176,6 +193,12 @@ public class AsteroidsGame : MonoBehaviour
         keyState |= Input.GetKey(KeyCode.UpArrow) ? (int)KeyState.Up : 0;
         keyState |= Input.GetKey(KeyCode.DownArrow) ? (int)KeyState.Down : 0;
         keyState |= Input.GetKey(KeyCode.Space) ? (int)KeyState.Space : 0;
+
+        if (Input.GetKey(KeyCode.R))
+        {
+            // Restart
+            ReInitGame();
+        }
 
         Update(m_GamePtr, keyState, Time.deltaTime);
 
