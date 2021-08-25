@@ -7,7 +7,8 @@ using UnityEngine.Assertions;
 
 public class AsteroidsGame : MonoBehaviour
 {
-    public float m_ShipSpeed = 1.0f;
+    public float m_ShipControlSpeed = 1.0f;
+    public float m_ShipControlRotationSpeed = 30.0f;
     public uint m_MaxAsteroidsCount = 10;
 
     public GameObject m_Camera;
@@ -43,7 +44,7 @@ public class AsteroidsGame : MonoBehaviour
     static extern int AddNumbers(int a, int b);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
-    static extern IntPtr AllocateGamePtr(uint asteroidTemplatesCount, uint maxAsteroidsCount, Vector2 viewportSize);
+    static extern IntPtr AllocateGamePtr(float shipSpeed, float shipRotationSpeed, uint asteroidTemplatesCount, uint maxAsteroidsCount, Vector2 viewportSize);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern void DetroyGamePtr(IntPtr gamePtr);
@@ -55,7 +56,7 @@ public class AsteroidsGame : MonoBehaviour
     static extern void GetAsteroidsPositions(IntPtr gamePtr, out IntPtr ptrPositions);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
-    static extern Vector2 GetShipPos(IntPtr gamePtr);
+    static extern Vector3 GetShipPosRot(IntPtr gamePtr);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern void Update(IntPtr gamePtr, int keyState, float deltaTime);
@@ -72,7 +73,7 @@ public class AsteroidsGame : MonoBehaviour
         Vector2 viewportSize = new Vector2(camera.orthographicSize * camera.aspect, camera.orthographicSize);
 
         // Allocate the game instance
-        m_GamePtr = AllocateGamePtr((uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, viewportSize);
+        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, viewportSize);
 
         // Preallocate Asteroids
         m_TotalAsteroidsCount = GetAsteroidsCount(m_GamePtr);
@@ -103,7 +104,11 @@ public class AsteroidsGame : MonoBehaviour
     {
         // Update the ships
         if (m_Ship)
-            m_Ship.transform.position = GetShipPos(m_GamePtr);
+        {
+            Vector3 shipPosRot = GetShipPosRot(m_GamePtr);
+            m_Ship.transform.position = new Vector2(shipPosRot.x, shipPosRot.y);
+            m_Ship.transform.rotation = Quaternion.Euler(0.0f, 0.0f, shipPosRot.z);
+        }
 
         // Update Asteroids
         IntPtr ptrPositions;

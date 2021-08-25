@@ -22,9 +22,9 @@ extern "C"
 
 		ASTEROID_EXPORT std::uint32_t AddNumbers(std::uint32_t a, std::uint32_t b);
 
-		ASTEROID_EXPORT void* AllocateGamePtr(std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, Vec2 viewportSize)
+		ASTEROID_EXPORT void* AllocateGamePtr(float shipControlSpeed, float shipControlRotationSpeed, std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, Vec2 viewportSize)
 		{
-			return new AsteroidsCPP::Game(asteroidTemplatesCount, maxAsteroidsCount, viewportSize);
+			return new AsteroidsCPP::Game(shipControlSpeed, shipControlRotationSpeed, asteroidTemplatesCount, maxAsteroidsCount, viewportSize);
 		}
 
 		ASTEROID_EXPORT void DetroyGamePtr(void* gamePtr)
@@ -49,9 +49,9 @@ extern "C"
 			*positions = static_cast<AsteroidsCPP::Game*>(gamePtr)->GetAsteroidsPositions();
 		}
 
-		ASTEROID_EXPORT AsteroidsCPP::Vec2 GetShipPos(void* gamePtr)
+		ASTEROID_EXPORT AsteroidsCPP::Vec3 GetShipPosRot(void* gamePtr)
 		{
-			return static_cast<AsteroidsCPP::Game*>(gamePtr)->GetShipPos();
+			return static_cast<AsteroidsCPP::Game*>(gamePtr)->GetShipPosRot();
 		}
 	}
 }

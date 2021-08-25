@@ -8,6 +8,12 @@ namespace AsteroidsCPP
 	{
 		float x, y;
 
+		Vec2(float x = 0.0f, float y = 0.0f)
+			: x(x)
+			, y(y)
+		{
+		}
+
 		Vec2 operator*(float a)
 		{
 			Vec2 result = *this;
@@ -20,6 +26,18 @@ namespace AsteroidsCPP
 		{
 			x += a.x;
 			y += a.y;
+		}
+	};
+
+	struct Vec3
+	{
+		float x, y, z;
+		
+		Vec3(float x = 0.0f, float y = 0.0f, float z = 0.0f)
+			: x(x)
+			, y(y)
+			, z(z)
+		{
 		}
 	};
 
@@ -46,16 +64,19 @@ namespace AsteroidsCPP
 			}
 		};
 
-		Game(std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, const Vec2& viewportSize);
+		Game(float shipControlSpeed, float shipControlRotationSpeed, std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, const Vec2& viewportSize);
 		~Game();
 
 		void Update(KeyState state, float deltaTime);
+		void ApplyShipControl(KeyState state, float deltaTime);
 
 		Vec2* GetAsteroidsPositions() const { return m_AsteroidsPositions; }
 		std::uint32_t GetAsteroidsCount() const { return m_AsteroidsCount; }
-		const Vec2 GetShipPos() const { return m_ShipPos; }
+		const Vec3 GetShipPosRot() const { return m_ShipPosRot; }
 
 	private:
+		float m_ShipControlSpeed;
+		float m_ShipControlRotationSpeed;
 		uint32_t m_AsteroidTemplatesCount;
 		uint32_t m_MaxAsteroidsCount;
 		Vec2 m_ViewportSize;
@@ -64,6 +85,8 @@ namespace AsteroidsCPP
 
 		Vec2* m_AsteroidsPositions;
 		Vec2* m_AsteroidsSpeeds;
-		Vec2 m_ShipPos;
+
+		Vec3 m_ShipPosRot;
+		Vec2 m_ShipSpeed;
 	};
 }
