@@ -4,16 +4,21 @@
 #include <algorithm>
 #include <cmath>
 
+// TODO: use #define _USE_MATH_DEFINES instead but mess with precompiled headers
+#define M_PI 3.14159265358979323846
+
 namespace AsteroidsCPP
 {
-	Game::Game(float shipControlSpeed, float shipControlRotationSpeed, std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, const Vec2& viewportSize)
+	Game::Game(float shipControlSpeed, float shipControlRotationSpeed, float shipMaxSpeed, std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, const Vec2& viewportSize)
 		: m_ShipControlSpeed(shipControlSpeed)
 		, m_ShipControlRotationSpeed(shipControlRotationSpeed)
+		, m_ShipMaxSpeed(shipMaxSpeed)
 		, m_AsteroidTemplatesCount(asteroidTemplatesCount)
 		, m_MaxAsteroidsCount(maxAsteroidsCount)
 		, m_ViewportSize(viewportSize)
 		, m_AsteroidsPositions(nullptr)
 		, m_AsteroidsSpeeds(nullptr)
+		, m_ShipRot(0.0f)
 	{
 		m_AsteroidsCount = 0;
 		for (uint32_t i = 0; i < m_AsteroidTemplatesCount; i++)
@@ -42,33 +47,55 @@ namespace AsteroidsCPP
 
 	void Game::Update(KeyState keyState, float deltaTime)
 	{
+		UpdateAsteroids(deltaTime);
 		ApplyShipControl(keyState, deltaTime);
 
-		// Update positions and loop it
-		for (uint32_t i = 0; i < m_AsteroidsCount; i++)
-		{
-			m_AsteroidsPositions[i] += m_AsteroidsSpeeds[i] * deltaTime;
-
-			if (m_AsteroidsPositions[i].x > m_ViewportSize.x) m_AsteroidsPositions[i].x = -m_ViewportSize.x;
-			if (m_AsteroidsPositions[i].x < -m_ViewportSize.x) m_AsteroidsPositions[i].x = m_ViewportSize.x;
-			if (m_AsteroidsPositions[i].y > m_ViewportSize.y) m_AsteroidsPositions[i].y = -m_ViewportSize.y;
-			if (m_AsteroidsPositions[i].y < -m_ViewportSize.y) m_AsteroidsPositions[i].y = m_ViewportSize.y;
-		}
 
 		// Check if the ship was destroyed
 
 		// Check if projectiles are hitting asteroids
 	}
 
+	void Game::UpdateAsteroids(float deltaTime)
+	{
+		for (uint32_t i = 0; i < m_AsteroidsCount; i++)
+		{
+			m_AsteroidsPositions[i] += m_AsteroidsSpeeds[i] * deltaTime;
+			LoopPosition(m_AsteroidsPositions[i]);
+		}
+	}
+
 	void Game::ApplyShipControl(KeyState keyState, float deltaTime)
 	{
+		// Rotation Control
 		float rotControl = keyState.Pressed(KeyState::Keys::Left) ? 1.0f : keyState.Pressed(KeyState::Keys::Right) ? -1.0f : 0.0f;
-		m_ShipPosRot.z += rotControl * m_ShipControlRotationSpeed * deltaTime;
+		m_ShipRot += rotControl * m_ShipControlRotationSpeed * deltaTime;
 
 		// Make sure we stay between -360 -> 360
-		while (m_ShipPosRot.z >= 360.0f)
-			m_ShipPosRot.z -= 360.0f;
-		while (m_ShipPosRot.z <= -360.0f)
-			m_ShipPosRot.z += 360.0f;
+		while (m_ShipRot >= 360.0f)
+			m_ShipRot -= 360.0f;
+		while (m_ShipRot <= -360.0f)
+			m_ShipRot += 360.0f;
+
+		// Forward Control
+		float forwardControl = keyState.Pressed(KeyState::Keys::Up) ? 1.0f : keyState.Pressed(KeyState::Keys::Down) ? -1.0f : 0.0f;
+		Vec2 direction = Vec2(cos(m_ShipRot * M_PI / 180.0f), sin(m_ShipRot * M_PI / 180.0f)) * forwardControl;
+		m_ShipSpeed += direction * m_ShipControlSpeed * deltaTime;
+
+		// Constraint speed
+		m_ShipSpeed.x = std::max(-m_ShipMaxSpeed, std::min(m_ShipMaxSpeed, m_ShipSpeed.x));
+		m_ShipSpeed.y = std::max(-m_ShipMaxSpeed, std::min(m_ShipMaxSpeed, m_ShipSpeed.y));
+
+		// Update Position
+		m_ShipPos += m_ShipSpeed * deltaTime;
+		LoopPosition(m_ShipPos);
+	}
+
+	void Game::LoopPosition(Vec2& position) const
+	{
+		if (position.x > m_ViewportSize.x) position.x = -m_ViewportSize.x;
+		if (position.x < -m_ViewportSize.x) position.x = m_ViewportSize.x;
+		if (position.y > m_ViewportSize.y) position.y = -m_ViewportSize.y;
+		if (position.y < -m_ViewportSize.y) position.y = m_ViewportSize.y;
 	}
 }

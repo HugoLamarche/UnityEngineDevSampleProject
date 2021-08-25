@@ -9,6 +9,8 @@ public class AsteroidsGame : MonoBehaviour
 {
     public float m_ShipControlSpeed = 1.0f;
     public float m_ShipControlRotationSpeed = 30.0f;
+    public float m_ShipMaxSpeed = 3.0f;
+
     public uint m_MaxAsteroidsCount = 10;
 
     public GameObject m_Camera;
@@ -44,7 +46,7 @@ public class AsteroidsGame : MonoBehaviour
     static extern int AddNumbers(int a, int b);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
-    static extern IntPtr AllocateGamePtr(float shipSpeed, float shipRotationSpeed, uint asteroidTemplatesCount, uint maxAsteroidsCount, Vector2 viewportSize);
+    static extern IntPtr AllocateGamePtr(float shipSpeed, float shipRotationSpeed, float shipMaxSpeed, uint asteroidTemplatesCount, uint maxAsteroidsCount, Vector2 viewportSize);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern void DetroyGamePtr(IntPtr gamePtr);
@@ -73,7 +75,7 @@ public class AsteroidsGame : MonoBehaviour
         Vector2 viewportSize = new Vector2(camera.orthographicSize * camera.aspect, camera.orthographicSize);
 
         // Allocate the game instance
-        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, viewportSize);
+        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, m_ShipMaxSpeed, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, viewportSize);
 
         // Preallocate Asteroids
         m_TotalAsteroidsCount = GetAsteroidsCount(m_GamePtr);
@@ -111,6 +113,7 @@ public class AsteroidsGame : MonoBehaviour
         }
 
         // Update Asteroids
+        // TODO: Only transfer active asteroids
         IntPtr ptrPositions;
         GetAsteroidsPositions(m_GamePtr, out ptrPositions);
         IntPtr p = ptrPositions;
@@ -120,6 +123,7 @@ public class AsteroidsGame : MonoBehaviour
             position = (Vector2)Marshal.PtrToStructure(p, typeof(Vector2));
             p += Marshal.SizeOf(typeof(Vector2));
 
+            // We use NAN to know if an asteroid is active
             bool isNAN = float.IsNaN(position.x);
             m_Asteroids[i].SetActive(!isNAN);
             if (!isNAN)

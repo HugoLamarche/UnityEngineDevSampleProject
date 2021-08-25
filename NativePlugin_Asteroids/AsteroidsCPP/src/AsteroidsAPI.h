@@ -22,9 +22,9 @@ extern "C"
 
 		ASTEROID_EXPORT std::uint32_t AddNumbers(std::uint32_t a, std::uint32_t b);
 
-		ASTEROID_EXPORT void* AllocateGamePtr(float shipControlSpeed, float shipControlRotationSpeed, std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, Vec2 viewportSize)
+		ASTEROID_EXPORT void* AllocateGamePtr(float shipControlSpeed, float shipControlRotationSpeed, float shipMaxSpeed, std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, Vec2 viewportSize)
 		{
-			return new AsteroidsCPP::Game(shipControlSpeed, shipControlRotationSpeed, asteroidTemplatesCount, maxAsteroidsCount, viewportSize);
+			return new AsteroidsCPP::Game(shipControlSpeed, shipControlRotationSpeed, shipMaxSpeed, asteroidTemplatesCount, maxAsteroidsCount, viewportSize);
 		}
 
 		ASTEROID_EXPORT void DetroyGamePtr(void* gamePtr)
