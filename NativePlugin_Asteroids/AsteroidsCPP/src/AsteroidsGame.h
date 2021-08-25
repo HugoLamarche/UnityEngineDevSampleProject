@@ -4,6 +4,25 @@
 
 namespace AsteroidsCPP
 {
+	struct Vec2
+	{
+		float x, y;
+
+		Vec2 operator*(float a)
+		{
+			Vec2 result = *this;
+			result.x *= a;
+			result.y *= a;
+			return result;
+		}
+
+		void operator+=(Vec2 a)
+		{
+			x += a.x;
+			y += a.y;
+		}
+	};
+
 	class Game
 	{
 	public:
@@ -27,8 +46,23 @@ namespace AsteroidsCPP
 			}
 		};
 
-		Game();
+		Game(std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount);
+		~Game();
 
 		void Update(KeyState state, float deltaTime);
+
+		Vec2* GetAsteroidsPositions() const { return m_AsteroidsPositions; }
+		std::uint32_t GetAsteroidsCount() const { return m_AsteroidsCount; }
+		const Vec2 GetShipPos() const { return m_ShipPos; }
+
+	private:
+		uint32_t m_AsteroidTemplatesCount;
+		uint32_t m_MaxAsteroidsCount;
+
+		uint32_t m_AsteroidsCount;
+
+		Vec2* m_AsteroidsPositions;
+		Vec2* m_AsteroidsSpeeds;
+		Vec2 m_ShipPos;
 	};
 }

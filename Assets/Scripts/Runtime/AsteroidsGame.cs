@@ -3,11 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class AsteroidsGame : MonoBehaviour
 {
+    public float m_ShipSpeed = 1.0f;
+    public uint m_MaxAsteroidsCount = 10;
+
+    public GameObject m_Ship;
+    public GameObject[] m_AsteroidTemplates;
+
     private IntPtr m_GamePtr = IntPtr.Zero;
-    
+    private uint m_TotalAsteroidsCount;
+
+    private GameObject[] m_Asteroids;
+
     enum KeyState : int
     {
         Left = 1 << 0,
@@ -32,28 +42,86 @@ public class AsteroidsGame : MonoBehaviour
     static extern int AddNumbers(int a, int b);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
+    static extern IntPtr AllocateGamePtr(uint asteroidTemplatesCount, uint maxAsteroidsCount);
+
+    [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
+    static extern void DetroyGamePtr(IntPtr gamePtr);
+
+    [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
+    static extern uint GetAsteroidsCount(IntPtr gamePtr);
+
+    [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
+    static extern void GetAsteroidsPositions(IntPtr gamePtr, out IntPtr ptrPositions);
+
+    [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
+    static extern Vector2 GetShipPos(IntPtr gamePtr);
+
+    [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern void Update(IntPtr gamePtr, int keyState, float deltaTime);
+
     #endregion
 
     // Start is called before the first frame update
     void Start()
     {
-        //Demo
-        var ret = Marshal.PtrToStringAnsi(HelloWorld());
-        Debug.Log("Got back string: " + ret);
-        int a = UnityEngine.Random.Range(0, 100);
-        int b = UnityEngine.Random.Range(0, 100);
-        var retInt = AddNumbers(a, b);
-        Debug.Log($"Adding numbers {a} and {b}: " + retInt);
+        // Allocate the game instance
+        m_GamePtr = AllocateGamePtr((uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount);
+
+        // Preallocate Asteroids
+        m_TotalAsteroidsCount = GetAsteroidsCount(m_GamePtr);
+        m_Asteroids = new GameObject[m_TotalAsteroidsCount];
+
+        uint level = 0;
+        uint index = 0;
+        foreach (GameObject template in m_AsteroidTemplates)
+        {
+            // We expect the data to be correct and cannot work properly if not
+            Assert.IsNotNull(template, "One of the asteroid template is null");
+
+            for (uint i = 0; i < m_MaxAsteroidsCount * Math.Pow(2, level); i++)
+            {
+                m_Asteroids[index] = Instantiate(template);
+                m_Asteroids[index].SetActive(false);
+                index++;
+            }
+            level++;
+        }
+    }
+    void OnDestroy()
+    {
+        DetroyGamePtr(m_GamePtr);
+    }
+
+    void SynchronizeVisuals()
+    {
+        // Update the ships
+        if (m_Ship)
+            m_Ship.transform.position = GetShipPos(m_GamePtr);
+
+        // Update Asteroids
+        IntPtr ptrPositions;
+        GetAsteroidsPositions(m_GamePtr, out ptrPositions);
+        IntPtr p = ptrPositions;
+        Vector2 position;
+        for (uint i = 0; i < m_TotalAsteroidsCount; i++)
+        {
+            position = (Vector2)Marshal.PtrToStructure(p, typeof(Vector2));
+            p += Marshal.SizeOf(typeof(Vector2));
+
+            bool isNAN = float.IsNaN(position.x);
+            m_Asteroids[i].SetActive(!isNAN);
+            if (!isNAN)
+                m_Asteroids[i].transform.position = position;
+        }
+
+        // Update bullets
     }
 
     // Update is called once per frame
     void Update()
     {
         if(m_GamePtr == null)
-        {
             return;
-        }
 
         int keyState = 0;
 
@@ -64,5 +132,7 @@ public class AsteroidsGame : MonoBehaviour
         keyState |= Input.GetKey(KeyCode.Space) ? (int)KeyState.Space : 0;
 
         Update(m_GamePtr, keyState, Time.deltaTime);
+
+        SynchronizeVisuals();
     }
 }

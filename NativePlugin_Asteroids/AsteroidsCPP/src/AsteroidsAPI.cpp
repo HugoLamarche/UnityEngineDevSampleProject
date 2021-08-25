@@ -16,5 +16,4 @@ namespace AsteroidsCPP
 	{
 		return a + b;
 	}
-
 }
