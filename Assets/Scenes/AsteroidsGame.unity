@@ -242,6 +242,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ShipSpeed: 1
   m_MaxAsteroidsCount: 3
+  m_Camera: {fileID: 1151198476}
   m_Ship: {fileID: 2041853587}
   m_AsteroidTemplates:
   - {fileID: 1857834941411398867, guid: 28483b87a92cb584e9c42907ab70750d, type: 3}

@@ -6,9 +6,10 @@
 
 namespace AsteroidsCPP
 {
-	Game::Game(std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount)
+	Game::Game(std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, const Vec2& viewportSize)
 		: m_AsteroidTemplatesCount(asteroidTemplatesCount)
 		, m_MaxAsteroidsCount(maxAsteroidsCount)
+		, m_ViewportSize(viewportSize)
 		, m_AsteroidsPositions(nullptr)
 		, m_AsteroidsSpeeds(nullptr)
 	{
@@ -48,10 +49,10 @@ namespace AsteroidsCPP
 		{
 			m_AsteroidsPositions[i] += m_AsteroidsSpeeds[i] * deltaTime;
 
-			if (m_AsteroidsPositions[i].x > 5.0f) m_AsteroidsPositions[i].x = -5.0f;
-			if (m_AsteroidsPositions[i].x < -5.0f) m_AsteroidsPositions[i].x = 5.0f;
-			if (m_AsteroidsPositions[i].y > 5.0f) m_AsteroidsPositions[i].y = -5.0f;
-			if (m_AsteroidsPositions[i].y < -5.0f) m_AsteroidsPositions[i].y = 5.0f;
+			if (m_AsteroidsPositions[i].x > m_ViewportSize.x) m_AsteroidsPositions[i].x = -m_ViewportSize.x;
+			if (m_AsteroidsPositions[i].x < -m_ViewportSize.x) m_AsteroidsPositions[i].x = m_ViewportSize.x;
+			if (m_AsteroidsPositions[i].y > m_ViewportSize.y) m_AsteroidsPositions[i].y = -m_ViewportSize.y;
+			if (m_AsteroidsPositions[i].y < -m_ViewportSize.y) m_AsteroidsPositions[i].y = m_ViewportSize.y;
 		}
 
 		// Check if the ship was destroyed

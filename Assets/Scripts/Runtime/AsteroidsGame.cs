@@ -10,6 +10,7 @@ public class AsteroidsGame : MonoBehaviour
     public float m_ShipSpeed = 1.0f;
     public uint m_MaxAsteroidsCount = 10;
 
+    public GameObject m_Camera;
     public GameObject m_Ship;
     public GameObject[] m_AsteroidTemplates;
 
@@ -42,7 +43,7 @@ public class AsteroidsGame : MonoBehaviour
     static extern int AddNumbers(int a, int b);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
-    static extern IntPtr AllocateGamePtr(uint asteroidTemplatesCount, uint maxAsteroidsCount);
+    static extern IntPtr AllocateGamePtr(uint asteroidTemplatesCount, uint maxAsteroidsCount, Vector2 viewportSize);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern void DetroyGamePtr(IntPtr gamePtr);
@@ -64,8 +65,14 @@ public class AsteroidsGame : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Calculate viewport
+        Assert.IsNotNull(m_Camera, "Please assign the camera");
+        Camera camera = m_Camera.GetComponent<Camera>();
+        Assert.IsNotNull(camera, "The camera gameobject doesn't have a camera component");
+        Vector2 viewportSize = new Vector2(camera.orthographicSize * camera.aspect, camera.orthographicSize);
+
         // Allocate the game instance
-        m_GamePtr = AllocateGamePtr((uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount);
+        m_GamePtr = AllocateGamePtr((uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, viewportSize);
 
         // Preallocate Asteroids
         m_TotalAsteroidsCount = GetAsteroidsCount(m_GamePtr);

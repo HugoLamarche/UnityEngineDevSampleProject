@@ -46,7 +46,7 @@ namespace AsteroidsCPP
 			}
 		};
 
-		Game(std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount);
+		Game(std::uint32_t asteroidTemplatesCount, std::uint32_t maxAsteroidsCount, const Vec2& viewportSize);
 		~Game();
 
 		void Update(KeyState state, float deltaTime);
@@ -58,6 +58,7 @@ namespace AsteroidsCPP
 	private:
 		uint32_t m_AsteroidTemplatesCount;
 		uint32_t m_MaxAsteroidsCount;
+		Vec2 m_ViewportSize;
 
 		uint32_t m_AsteroidsCount;
 
