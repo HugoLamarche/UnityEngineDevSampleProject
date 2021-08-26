@@ -103,6 +103,7 @@ namespace AsteroidsCPP
 		void UpdateBullets(float deltaTime);
 		void ApplyShipControl(KeyState state, float deltaTime);
 		void LoopPosition(Vec2& position) const;
+		void BreakAsteroid(const Vec2 position, uint32_t level);
 
 		float m_ShipControlSpeed;
 		float m_ShipControlRotationSpeed;

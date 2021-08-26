@@ -65,7 +65,7 @@ namespace AsteroidsCPP
 		// Only activate the first level of asteroids
 		for (uint32_t i = 0; i < m_AsteroidsCount; i++)
 		{
-			if (true)//i < m_MaxAsteroidsCount)
+			if (i < m_MaxAsteroidsCount)
 			{
 				// TODO: Implement a better way to choose between one of the four sides
 				// Create two value to represent the random start position on X or Y axis
@@ -183,8 +183,13 @@ namespace AsteroidsCPP
 			// Check if we touch something
 			for (uint32_t j = 0; j < m_AsteroidsCount; j++)
 			{
-				if (SqrDistance(m_BulletsPositions[i], m_AsteroidsPositions[j]) < (m_BulletSqrRadius + m_AsteroidsTemplateSqrRadius[GetLevelFromIndex(j)]))
+				const uint32_t asteroidLevel = GetLevelFromIndex(j);
+				if (SqrDistance(m_BulletsPositions[i], m_AsteroidsPositions[j]) < (m_BulletSqrRadius + m_AsteroidsTemplateSqrRadius[asteroidLevel]))
 				{
+					// If it's not the last asteroid template type let's multiply !
+					if ((asteroidLevel + 1) < m_AsteroidTemplatesCount)
+						BreakAsteroid(m_AsteroidsPositions[j], asteroidLevel);
+					
 					m_BulletsPositions[i].x = NAN;
 					m_AsteroidsPositions[j].x = NAN;
 					break;
@@ -244,5 +249,22 @@ namespace AsteroidsCPP
 		if (position.x < -m_ViewportSize.x) position.x = m_ViewportSize.x;
 		if (position.y > m_ViewportSize.y) position.y = -m_ViewportSize.y;
 		if (position.y < -m_ViewportSize.y) position.y = m_ViewportSize.y;
+	}
+
+	void Game::BreakAsteroid(const Vec2 position, uint32_t level)
+	{
+		// TODO: Optimize method to find available asteroids
+		uint32_t spawned = 0;
+		uint32_t newLevel = level + 1;
+		for (uint32_t i = m_LevelsBoundaries[level] + 1; spawned < 2 && i <= m_LevelsBoundaries[newLevel]; i++)
+		{
+			if (isnan(m_AsteroidsPositions[i].x))
+			{
+				m_AsteroidsPositions[i] = position;
+				m_AsteroidsSpeeds[i].x = (float)rand() / (float)RAND_MAX * 2.0f * ((m_MaxAsteroidsSpeed - m_MinAsteroidsSpeed) + m_MinAsteroidsSpeed) - m_MaxAsteroidsSpeed;
+				m_AsteroidsSpeeds[i].y = (float)rand() / (float)RAND_MAX * 2.0f * ((m_MaxAsteroidsSpeed - m_MinAsteroidsSpeed) + m_MinAsteroidsSpeed) - m_MaxAsteroidsSpeed;
+				spawned++;
+			}
+		}
 	}
 }
