@@ -17,6 +17,10 @@ namespace AsteroidsCPP
 			   std::uint32_t maxAsteroidsCount,
 			   float minAsteroidsSpeed,
 			   float maxAsteroidsSpeed,
+			   float fireRate,
+			   float bulletLifeSpan,
+			   float bulletSpeed,
+			   float bulletSqrRadius,
 			   const Vec2& viewportSize)
 		: m_ShipControlSpeed(shipControlSpeed)
 		, m_ShipControlRotationSpeed(shipControlRotationSpeed)
@@ -26,9 +30,13 @@ namespace AsteroidsCPP
 		, m_MaxAsteroidsCount(maxAsteroidsCount)
 		, m_MinAsteroidsSpeed(minAsteroidsSpeed)
 		, m_MaxAsteroidsSpeed(maxAsteroidsSpeed)
+		, m_FireRate(fireRate)
+		, m_BulletLifeSpan(bulletLifeSpan)
+		, m_BulletSpeed(bulletSpeed)
+		, m_BulletSqrRadius(bulletSqrRadius)
 		, m_ViewportSize(viewportSize)
-		, m_AsteroidsPositions(nullptr)
-		, m_AsteroidsSpeeds(nullptr)
+		, m_TimeSinceLastFire(FLT_MAX)
+		, m_NextBulletIndex(0)
 		, m_ShipRot(0.0f)
 		, m_ShipDestroyed(false)
 	{
@@ -79,6 +87,17 @@ namespace AsteroidsCPP
 			else
 				m_AsteroidsPositions[i].x = NAN;
 		}
+
+		// Make sure we have enough bullet
+		m_BulletsCount = m_FireRate * m_BulletLifeSpan;
+		m_BulletsPositions = new Vec2[m_BulletsCount];
+		m_BulletsSpeed = new Vec2[m_BulletsCount];
+		m_BulletsLife = new float[m_BulletsCount];
+
+		for (uint32_t i = 0; i < m_BulletsCount; i++)
+		{
+			m_BulletsPositions[i].x = NAN;
+		}
 	}
 
 	Game::~Game()
@@ -87,6 +106,9 @@ namespace AsteroidsCPP
 		delete[] m_LevelsBoundaries;
 		delete[] m_AsteroidsPositions;
 		delete[] m_AsteroidsSpeeds;
+		delete[] m_BulletsPositions;
+		delete[] m_BulletsSpeed;
+		delete[] m_BulletsLife;
 	}
 
 	void Game::SetAsteroidTemplateSqrRadius(std::uint32_t level, float sqrRadius)
@@ -112,8 +134,7 @@ namespace AsteroidsCPP
 
 		ApplyShipControl(keyState, deltaTime);
 		UpdateAsteroids(deltaTime);
-
-		// Check if projectiles are hitting asteroids
+		UpdateBullets(deltaTime);
 	}
 
 	float SqrDistance(Vec2 a, Vec2 b)
@@ -123,6 +144,7 @@ namespace AsteroidsCPP
 
 	void Game::UpdateAsteroids(float deltaTime)
 	{
+		// TODO: Optimize by only iterate on active Asteroids (don't even loop)
 		for (uint32_t i = 0; i < m_AsteroidsCount; i++)
 		{
 			if (isnan(m_AsteroidsPositions[i].x))
@@ -136,6 +158,37 @@ namespace AsteroidsCPP
 			{
 				m_ShipDestroyed = true;
 				break;
+			}
+		}
+	}
+
+	void Game::UpdateBullets(float deltaTime)
+	{
+		// TODO: Optimize and factorise with UpdateAsteroids
+		for (uint32_t i = 0; i < m_BulletsCount; i++)
+		{
+			if (isnan(m_BulletsPositions[i].x))
+				continue;
+
+			m_BulletsLife[i] -= deltaTime;
+			if (m_BulletsLife[i] <= 0.0f)
+			{
+				m_BulletsPositions[i].x = NAN;
+				continue;
+			}
+
+			m_BulletsPositions[i] += m_BulletsSpeed[i] * deltaTime;
+			LoopPosition(m_BulletsPositions[i]);
+
+			// Check if we touch something
+			for (uint32_t j = 0; j < m_AsteroidsCount; j++)
+			{
+				if (SqrDistance(m_BulletsPositions[i], m_AsteroidsPositions[j]) < (m_BulletSqrRadius + m_AsteroidsTemplateSqrRadius[GetLevelFromIndex(j)]))
+				{
+					m_BulletsPositions[i].x = NAN;
+					m_AsteroidsPositions[j].x = NAN;
+					break;
+				}
 			}
 		}
 	}
@@ -154,16 +207,34 @@ namespace AsteroidsCPP
 
 		// Forward Control
 		float forwardControl = keyState.Pressed(KeyState::Keys::Up) ? 1.0f : keyState.Pressed(KeyState::Keys::Down) ? -1.0f : 0.0f;
-		Vec2 direction = Vec2(cos(m_ShipRot * M_PI / 180.0f), sin(m_ShipRot * M_PI / 180.0f)) * forwardControl;
-		m_ShipSpeed += direction * m_ShipControlSpeed * deltaTime;
+		const Vec2 direction = Vec2(cos(m_ShipRot * M_PI / 180.0f), sin(m_ShipRot * M_PI / 180.0f));
+		m_ShipSpeed += direction * m_ShipControlSpeed * forwardControl * deltaTime;
 
-		// Constraint speed
+		// Constraint Speed
 		m_ShipSpeed.x = std::max(-m_ShipMaxSpeed, std::min(m_ShipMaxSpeed, m_ShipSpeed.x));
 		m_ShipSpeed.y = std::max(-m_ShipMaxSpeed, std::min(m_ShipMaxSpeed, m_ShipSpeed.y));
 
 		// Update Position
 		m_ShipPos += m_ShipSpeed * deltaTime;
 		LoopPosition(m_ShipPos);
+
+		// Update Firing
+		// TODO: Current Implementation has a limit of one fire per simulation tick (Fine I guess)
+		if (m_FireRate > 0.0f && m_TimeSinceLastFire > (1.0f / m_FireRate))
+		{
+			if (keyState.Pressed(KeyState::Keys::Space))
+			{
+				m_BulletsPositions[m_NextBulletIndex] = m_ShipPos;
+				m_BulletsSpeed[m_NextBulletIndex] = direction * m_BulletSpeed;
+				m_BulletsLife[m_NextBulletIndex] = m_BulletLifeSpan;
+
+				if (++m_NextBulletIndex >= m_BulletsCount)
+					m_NextBulletIndex = 0;
+				m_TimeSinceLastFire = 0.0f;
+			}
+		}
+		else
+			m_TimeSinceLastFire += deltaTime;
 	}
 
 	void Game::LoopPosition(Vec2& position) const

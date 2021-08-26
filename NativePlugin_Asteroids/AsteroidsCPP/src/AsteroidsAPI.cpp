@@ -14,6 +14,10 @@ namespace AsteroidsCPP
 										  std::uint32_t maxAsteroidsCount,
 										  float minAsteroidsSpeed,
 										  float maxAsteroidsSpeed,
+										  float fireRate,
+										  float bulletLifeSpan,
+										  float bulletSpeed,
+										  float bulletSqrRadius,
 										  Vec2 viewportSize)
 	{
 		return new AsteroidsCPP::Game(shipControlSpeed,
@@ -24,6 +28,10 @@ namespace AsteroidsCPP
 									  maxAsteroidsCount,
 									  minAsteroidsSpeed,
 									  maxAsteroidsSpeed,
+									  fireRate,
+									  bulletLifeSpan,
+									  bulletSpeed,
+									  bulletSqrRadius,
 									  viewportSize);
 	}
 
@@ -43,6 +51,11 @@ namespace AsteroidsCPP
 		return static_cast<AsteroidsCPP::Game*>(gamePtr)->GetAsteroidsCount();
 	}
 
+	ASTEROID_EXPORT std::uint32_t GetBulletsCount(void* gamePtr)
+	{
+		return static_cast<AsteroidsCPP::Game*>(gamePtr)->GetBulletsCount();
+	}
+
 	ASTEROID_EXPORT void Update(void* gamePtr, AsteroidsCPP::Game::KeyState keyState, float deltaTime)
 	{
 		static_cast<AsteroidsCPP::Game*>(gamePtr)->Update(keyState, deltaTime);
@@ -51,6 +64,11 @@ namespace AsteroidsCPP
 	ASTEROID_EXPORT void GetAsteroidsPositions(void* gamePtr, Vec2** positions)
 	{
 		*positions = static_cast<AsteroidsCPP::Game*>(gamePtr)->GetAsteroidsPositions();
+	}
+
+	ASTEROID_EXPORT void GetBulletsPositions(void* gamePtr, Vec2** positions)
+	{
+		*positions = static_cast<AsteroidsCPP::Game*>(gamePtr)->GetBulletsPositions();
 	}
 
 	ASTEROID_EXPORT AsteroidsCPP::Vec3 GetShipPosRot(void* gamePtr)

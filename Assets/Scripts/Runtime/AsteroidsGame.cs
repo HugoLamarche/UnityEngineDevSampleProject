@@ -15,14 +15,21 @@ public class AsteroidsGame : MonoBehaviour
     public float m_MinAsteroidsSpeed = 1.0f;
     public float m_MaxAsteroidsSpeed = 5.0f;
 
+    public float m_FireRate = 10.0f;
+    public float m_BulletLifeSpan = 1.0f;
+    public float m_BulletSpeed = 5.0f;
+
     public GameObject m_Camera;
     public GameObject m_Ship;
     public GameObject[] m_AsteroidTemplates;
+    public GameObject m_BulletTemplate;
 
     private IntPtr m_GamePtr = IntPtr.Zero;
     private uint m_TotalAsteroidsCount;
+    private uint m_BulletsCount;
 
     private GameObject[] m_Asteroids;
+    private GameObject[] m_Bullets;
 
     enum KeyState : int
     {
@@ -56,6 +63,10 @@ public class AsteroidsGame : MonoBehaviour
                                          uint maxAsteroidsCount,
                                          float minAsteroidsSpeed,
                                          float maxAsteroidsSpeed,
+                                         float fireRate,
+                                         float bulletLifeSpan,
+                                         float bulletSpeed,
+                                         float bulletSqrRadius,
                                          Vector2 viewportSize);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
@@ -68,7 +79,13 @@ public class AsteroidsGame : MonoBehaviour
     static extern uint GetAsteroidsCount(IntPtr gamePtr);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
+    static extern uint GetBulletsCount(IntPtr gamePtr);
+
+    [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern void GetAsteroidsPositions(IntPtr gamePtr, out IntPtr ptrPositions);
+
+    [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
+    static extern void GetBulletsPositions(IntPtr gamePtr, out IntPtr ptrPositions);
 
     [DllImport(AsteroidNativeDLL, CallingConvention = CallingConvention.Cdecl)]
     static extern Vector3 GetShipPosRot(IntPtr gamePtr);
@@ -98,6 +115,15 @@ public class AsteroidsGame : MonoBehaviour
             m_Asteroids = null;
         }
 
+        if (m_Bullets != null)
+        {
+            foreach (GameObject bullet in m_Bullets)
+            {
+                Destroy(bullet);
+            }
+            m_Bullets = null;
+        }
+
         // Calculate viewport
         Assert.IsNotNull(m_Camera, "Please assign the camera");
         Camera camera = m_Camera.GetComponent<Camera>();
@@ -110,7 +136,25 @@ public class AsteroidsGame : MonoBehaviour
         Assert.IsNotNull(shipRenderer, "The ship gameobject doesn't have a sprite renderer");
         float shipSqrRadius = GetSqrRadiusFromBound(shipRenderer.bounds);
 
-        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed, m_ShipControlRotationSpeed, m_ShipMaxSpeed, shipSqrRadius, (uint)m_AsteroidTemplates.Length, m_MaxAsteroidsCount, m_MinAsteroidsSpeed, m_MaxAsteroidsSpeed, viewportSize);
+        // Retreive Bullet Radius
+        Assert.IsNotNull(m_BulletTemplate, "Please assign the bullet");
+        SpriteRenderer bulletRenderer = m_BulletTemplate.GetComponent<SpriteRenderer>();
+        Assert.IsNotNull(bulletRenderer, "The bullet gameobject doesn't have a sprite renderer");
+        float bulletSqrRadius = GetSqrRadiusFromBound(bulletRenderer.bounds);
+
+        m_GamePtr = AllocateGamePtr(m_ShipControlSpeed,
+                                    m_ShipControlRotationSpeed,
+                                    m_ShipMaxSpeed,
+                                    shipSqrRadius,
+                                    (uint)m_AsteroidTemplates.Length,
+                                    m_MaxAsteroidsCount,
+                                    m_MinAsteroidsSpeed,
+                                    m_MaxAsteroidsSpeed,
+                                    m_FireRate,
+                                    m_BulletLifeSpan,
+                                    m_BulletSpeed,
+                                    bulletSqrRadius,
+                                    viewportSize);
 
         // Preallocate Asteroids
         m_TotalAsteroidsCount = GetAsteroidsCount(m_GamePtr);
@@ -136,7 +180,14 @@ public class AsteroidsGame : MonoBehaviour
             level++;
         }
 
+        m_BulletsCount = GetBulletsCount(m_GamePtr);
+        m_Bullets = new GameObject[m_BulletsCount];
         // Preallocate Bullets
+        for (uint i = 0; i < m_BulletsCount; i++)
+        {
+            m_Bullets[i] = Instantiate(m_BulletTemplate);
+            m_Bullets[i].SetActive(false);
+        }
     }
 
     // Start is called before the first frame update
@@ -178,6 +229,20 @@ public class AsteroidsGame : MonoBehaviour
         }
 
         // Update bullets
+        // TODO: Factorise code with above
+        GetBulletsPositions(m_GamePtr, out ptrPositions);
+        p = ptrPositions;
+        for (uint i = 0; i < m_BulletsCount; i++)
+        {
+            position = (Vector2)Marshal.PtrToStructure(p, typeof(Vector2));
+            p += Marshal.SizeOf(typeof(Vector2));
+
+            // We use NAN to know if an asteroid is active
+            bool isNAN = float.IsNaN(position.x);
+            m_Bullets[i].SetActive(!isNAN);
+            if (!isNAN)
+                m_Bullets[i].transform.position = position;
+        }
     }
 
     // Update is called once per frame

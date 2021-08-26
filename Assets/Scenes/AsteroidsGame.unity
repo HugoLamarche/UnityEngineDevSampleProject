@@ -246,12 +246,16 @@ MonoBehaviour:
   m_MaxAsteroidsCount: 2
   m_MinAsteroidsSpeed: 1
   m_MaxAsteroidsSpeed: 2
+  m_FireRate: 30
+  m_BulletLifeSpan: 1
+  m_BulletSpeed: 10
   m_Camera: {fileID: 1151198476}
   m_Ship: {fileID: 2041853587}
   m_AsteroidTemplates:
   - {fileID: 1857834941411398867, guid: 28483b87a92cb584e9c42907ab70750d, type: 3}
   - {fileID: 8426315705822408393, guid: 1f82b32457e56ac4fb803bd7a0122ca6, type: 3}
   - {fileID: 506701040896098071, guid: 22304c27aa5bc5745ab6ddbe9cfd4149, type: 3}
+  m_BulletTemplate: {fileID: 2550769449590198557, guid: c3eee6564f38b8745b77e657c02509ea, type: 3}
 --- !u!4 &1631698054
 Transform:
   m_ObjectHideFlags: 0

@@ -14,7 +14,7 @@ namespace AsteroidsCPP
 		{
 		}
 
-		Vec2 operator*(float a)
+		Vec2 operator*(float a) const
 		{
 			Vec2 result = *this;
 			result.x *= a;
@@ -78,6 +78,10 @@ namespace AsteroidsCPP
              std::uint32_t maxAsteroidsCount,
              float minAsteroidsSpeed,
              float maxAsteroidsSpeed,
+             float fireRate,
+             float bulletLifeSpan,
+             float bulletSpeed,
+             float bulletSqrRadius,
              const Vec2& viewportSize);
 		~Game();
 
@@ -89,10 +93,14 @@ namespace AsteroidsCPP
 		std::uint32_t GetAsteroidsCount() const { return m_AsteroidsCount; }
 		const Vec3 GetShipPosRot() const { return Vec3(m_ShipPos.x, m_ShipPos.y, m_ShipRot); }
 
+		Vec2* GetBulletsPositions() const { return m_BulletsPositions; }
+		std::uint32_t GetBulletsCount() const { return m_BulletsCount; }
+
 	private:
         std::uint32_t GetLevelFromIndex(std::uint32_t index) const;
 
 		void UpdateAsteroids(float deltaTime);
+		void UpdateBullets(float deltaTime);
 		void ApplyShipControl(KeyState state, float deltaTime);
 		void LoopPosition(Vec2& position) const;
 
@@ -100,6 +108,12 @@ namespace AsteroidsCPP
 		float m_ShipControlRotationSpeed;
 		float m_ShipMaxSpeed;
         float m_ShipSqrRadius;
+
+        std::uint32_t m_BulletsCount;
+        float m_FireRate;
+        float m_BulletLifeSpan;
+        float m_BulletSpeed;
+        float m_BulletSqrRadius;
 
 		uint32_t m_AsteroidTemplatesCount;
         float* m_AsteroidsTemplateSqrRadius;
@@ -114,6 +128,12 @@ namespace AsteroidsCPP
 
 		Vec2* m_AsteroidsPositions;
 		Vec2* m_AsteroidsSpeeds;
+
+		float m_TimeSinceLastFire;
+		uint32_t m_NextBulletIndex;
+		Vec2* m_BulletsPositions;
+		Vec2* m_BulletsSpeed;
+		float* m_BulletsLife;
 
 		Vec2 m_ShipPos;
 		float m_ShipRot;

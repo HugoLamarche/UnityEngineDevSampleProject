@@ -26,6 +26,10 @@ extern "C"
 											  std::uint32_t maxAsteroidsCount,
 											  float minAsteroidsSpeed,
 											  float maxAsteroidsSpeed,
+											  float fireRate,
+											  float bulletLifeSpan,
+											  float bulletSpeed,
+											  float bulletSqrRadius,
 											  Vec2 viewportSize);
 
 		ASTEROID_EXPORT void DetroyGamePtr(void* gamePtr);
@@ -34,9 +38,13 @@ extern "C"
 
 		ASTEROID_EXPORT std::uint32_t GetAsteroidsCount(void* gamePtr);
 
+		ASTEROID_EXPORT std::uint32_t GetBulletsCount(void* gamePtr);
+
 		ASTEROID_EXPORT void Update(void* gamePtr, AsteroidsCPP::Game::KeyState keyState, float deltaTime);
 
 		ASTEROID_EXPORT void GetAsteroidsPositions(void* gamePtr, Vec2** positions);
+
+		ASTEROID_EXPORT void GetBulletsPositions(void* gamePtr, Vec2** positions);
 
 		ASTEROID_EXPORT AsteroidsCPP::Vec3 GetShipPosRot(void* gamePtr);
 	}
