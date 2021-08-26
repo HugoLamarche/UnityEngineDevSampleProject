@@ -33,3 +33,5 @@ My current implementation isn't ideal but I think it's good enough for the amoun
 - Pretty early I've decided to transfer the fewest data possible for an asteroid and I've decided to use the NAN number to determine if a Asteroid / Bullet was inactive. I'm happy about the result altough I think that keeping everything into a single array for asteroids forced me to compute too much to find indexes of different types of Asteroids (see Game::GetLevelFromIndex(...) ). If I have opted to have one array for each asteroid level I would have saved this but lose the faculty to add more level of destruction. It would be interesting to invest time to find a good way to have both.
 
 - Early I've found out that I needed to restart Unity to rebuild the native plugin... After doing some research about it I found some solutions but I wanted to focus the time I had on making the actual game so I gave up on this. (Thanks to my Ryzen 5800X CPU for starting Unity quiclky ;) )
+
+- In the future I'd like to avoid all the allocation made by Marshal.PtrToStructure, this seems to be the biggest bottleneck I have right now (seen in the profiler)
