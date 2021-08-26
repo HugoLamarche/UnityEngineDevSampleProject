@@ -27,6 +27,7 @@ public class AsteroidsGame : MonoBehaviour
     private IntPtr m_GamePtr = IntPtr.Zero;
     private uint m_TotalAsteroidsCount;
     private uint m_BulletsCount;
+    private int m_SizeOfVector2;
 
     private GameObject[] m_Asteroids;
     private GameObject[] m_Bullets;
@@ -193,6 +194,7 @@ public class AsteroidsGame : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        m_SizeOfVector2 = Marshal.SizeOf(typeof(Vector2));
         ReInitGame();
     }
     void OnDestroy()
@@ -219,7 +221,7 @@ public class AsteroidsGame : MonoBehaviour
         for (uint i = 0; i < m_TotalAsteroidsCount; i++)
         {
             position = (Vector2)Marshal.PtrToStructure(p, typeof(Vector2));
-            p += Marshal.SizeOf(typeof(Vector2));
+            p += m_SizeOfVector2;
 
             // We use NAN to know if an asteroid is active
             bool active = !float.IsNaN(position.x);
@@ -236,7 +238,7 @@ public class AsteroidsGame : MonoBehaviour
         for (uint i = 0; i < m_BulletsCount; i++)
         {
             position = (Vector2)Marshal.PtrToStructure(p, typeof(Vector2));
-            p += Marshal.SizeOf(typeof(Vector2));
+            p += m_SizeOfVector2;
 
             // We use NAN to know if an asteroid is active
             bool active = !float.IsNaN(position.x);
