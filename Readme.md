@@ -3,6 +3,16 @@
 - Open Project in Unity
 - Play
 
+There is a bunch of variables fun to play with in the editor including :
+* ShipControlSpeed
+* ShipControlRotationSpeed
+* ShipMaxSpeed
+* MinAsteroidsSpeed
+* MaxAsteroidsSpeed
+* FireRate
+* BulletLifeSpan
+* BulletSpeed
+
 # Game Controls
 - R : Restart Game
 
