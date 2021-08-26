@@ -222,9 +222,10 @@ public class AsteroidsGame : MonoBehaviour
             p += Marshal.SizeOf(typeof(Vector2));
 
             // We use NAN to know if an asteroid is active
-            bool isNAN = float.IsNaN(position.x);
-            m_Asteroids[i].SetActive(!isNAN);
-            if (!isNAN)
+            bool active = !float.IsNaN(position.x);
+            if (m_Asteroids[i].activeSelf != active)
+                m_Asteroids[i].SetActive(active);
+            if (active)
                 m_Asteroids[i].transform.position = position;
         }
 
@@ -238,9 +239,10 @@ public class AsteroidsGame : MonoBehaviour
             p += Marshal.SizeOf(typeof(Vector2));
 
             // We use NAN to know if an asteroid is active
-            bool isNAN = float.IsNaN(position.x);
-            m_Bullets[i].SetActive(!isNAN);
-            if (!isNAN)
+            bool active = !float.IsNaN(position.x);
+            if (m_Bullets[i].activeSelf != active)
+                m_Bullets[i].SetActive(active);
+            if (active)
                 m_Bullets[i].transform.position = position;
         }
     }
