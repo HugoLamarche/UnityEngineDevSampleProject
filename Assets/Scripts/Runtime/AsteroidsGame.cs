@@ -26,8 +26,9 @@ public class AsteroidsGame : MonoBehaviour
 
     private IntPtr m_GamePtr = IntPtr.Zero;
     private uint m_TotalAsteroidsCount;
+    private float[] m_AsteroidsPositionsArray;
     private uint m_BulletsCount;
-    private int m_SizeOfVector2;
+    private float[] m_BulletsPositionsArray;
 
     private GameObject[] m_Asteroids;
     private GameObject[] m_Bullets;
@@ -160,6 +161,7 @@ public class AsteroidsGame : MonoBehaviour
         // Preallocate Asteroids
         m_TotalAsteroidsCount = GetAsteroidsCount(m_GamePtr);
         m_Asteroids = new GameObject[m_TotalAsteroidsCount];
+        m_AsteroidsPositionsArray = new float[m_TotalAsteroidsCount * 2];
 
         uint level = 0;
         uint index = 0;
@@ -183,6 +185,7 @@ public class AsteroidsGame : MonoBehaviour
 
         m_BulletsCount = GetBulletsCount(m_GamePtr);
         m_Bullets = new GameObject[m_BulletsCount];
+        m_BulletsPositionsArray = new float[m_BulletsCount * 2];
         // Preallocate Bullets
         for (uint i = 0; i < m_BulletsCount; i++)
         {
@@ -194,7 +197,6 @@ public class AsteroidsGame : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        m_SizeOfVector2 = Marshal.SizeOf(typeof(Vector2));
         ReInitGame();
     }
     void OnDestroy()
@@ -216,36 +218,29 @@ public class AsteroidsGame : MonoBehaviour
         // TODO: Optimize by only transfering active asteroids
         IntPtr ptrPositions;
         GetAsteroidsPositions(m_GamePtr, out ptrPositions);
-        IntPtr p = ptrPositions;
-        Vector2 position;
+        Marshal.Copy(ptrPositions, m_AsteroidsPositionsArray, 0, (int)m_TotalAsteroidsCount * 2);
         for (uint i = 0; i < m_TotalAsteroidsCount; i++)
         {
-            position = (Vector2)Marshal.PtrToStructure(p, typeof(Vector2));
-            p += m_SizeOfVector2;
-
             // We use NAN to know if an asteroid is active
-            bool active = !float.IsNaN(position.x);
+            bool active = !float.IsNaN(m_AsteroidsPositionsArray[i * 2]);
             if (m_Asteroids[i].activeSelf != active)
                 m_Asteroids[i].SetActive(active);
             if (active)
-                m_Asteroids[i].transform.position = position;
+                m_Asteroids[i].transform.position = new Vector2(m_AsteroidsPositionsArray[i * 2], m_AsteroidsPositionsArray[i * 2 + 1]);
         }
 
         // Update bullets
         // TODO: Factorise code with above
         GetBulletsPositions(m_GamePtr, out ptrPositions);
-        p = ptrPositions;
+        Marshal.Copy(ptrPositions, m_BulletsPositionsArray, 0, (int)m_BulletsCount * 2);
         for (uint i = 0; i < m_BulletsCount; i++)
         {
-            position = (Vector2)Marshal.PtrToStructure(p, typeof(Vector2));
-            p += m_SizeOfVector2;
-
             // We use NAN to know if an asteroid is active
-            bool active = !float.IsNaN(position.x);
+            bool active = !float.IsNaN(m_BulletsPositionsArray[i * 2]);
             if (m_Bullets[i].activeSelf != active)
                 m_Bullets[i].SetActive(active);
             if (active)
-                m_Bullets[i].transform.position = position;
+                m_Bullets[i].transform.position = new Vector2(m_BulletsPositionsArray[i * 2], m_BulletsPositionsArray[i * 2 + 1]);
         }
     }
 

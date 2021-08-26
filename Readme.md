@@ -34,4 +34,4 @@ My current implementation isn't ideal but I think it's good enough for the amoun
 
 - Early I've found out that I needed to restart Unity to rebuild the native plugin... After doing some research about it I found some solutions but I wanted to focus the time I had on making the actual game so I gave up on this. (Thanks to my Ryzen 5800X CPU for starting Unity quiclky ;) )
 
-- In the future I'd like to avoid all the allocation made by Marshal.PtrToStructure, this seems to be the biggest bottleneck I have right now (seen in the profiler)
+- In the future I'd like to avoid all the allocation made by Marshal.PtrToStructure, this seems to be the biggest bottleneck I have right now (seen in the profiler) => Found a quick way (not sure about platform interability I would need to check that futhermore)
